@@ -17,15 +17,11 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <div className="bg-[#212121]">
-      <Navbar />
+      {//<Navbar />
+      }
       <HeroSection />
-      <FeaturedTime />
-      <MakerIntro />
-      <PricingSection />
-      <FAQ />
-      <TestimonialsPage />
-      <CTA />
-      <Footer />
+      {//<Footer />
+      }
     </div>
   );
 }
