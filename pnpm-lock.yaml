@@ -41,6 +41,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      components:
+        specifier: link:@/components
+        version: link:@/components
       crypto:
         specifier: ^1.0.1
         version: 1.0.1
