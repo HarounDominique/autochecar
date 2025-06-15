@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 
 const navItems = [
   { name: "Inicio", path: "/dashboard" },
-  { name: "Mis Vehículos", path: "/dashboard/vehicles" },
+  { name: "Mi Garaje", path: "/dashboard/garage" },
   { name: "Perfil", path: "/dashboard/profile" },
   { name: "Configuración", path: "/dashboard/settings" },
 ];
