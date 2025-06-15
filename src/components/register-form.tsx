@@ -11,15 +11,41 @@ import { Label } from "@/components/ui/label";
 export default function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const router = useRouter();
   const supabase = createClient();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.auth.signUp({ email, password });
-    if (error) {
-      console.error("Error registering:", error.message);
-    } else {
+
+    // Crear usuario
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (signUpError) {
+      console.error("Error registering:", signUpError.message);
+      return;
+    }
+
+    const userId = signUpData.user?.id;
+
+    // Insertar en la tabla profiles
+    if (userId) {
+      const { error: profileError } = await supabase.from("profiles").insert([
+        {
+          id: userId,
+          username,
+        },
+      ]);
+
+      if (profileError) {
+        console.error("Error creating profile:", profileError.message);
+        return;
+      }
+
+      // Redirigir si todo va bien
       router.push("/dashboard");
     }
   };
@@ -27,6 +53,16 @@ export default function RegisterForm() {
   return (
     <div className="space-y-6">
       <form onSubmit={handleRegister} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="username">Nombre de usuario</Label>
+          <Input
+            id="username"
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -52,9 +88,9 @@ export default function RegisterForm() {
         </Button>
       </form>
       <p className="text-center text-sm">
-        Already have an account?{" "}
+        ¿Ya tienes cuenta?{" "}
         <Link href="/login" className="text-blue-500 hover:underline">
-          Login
+          Iniciar sesión
         </Link>
       </p>
     </div>

@@ -12,15 +12,13 @@ const HeroSection = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+  const [username, setUsername] = useState(""); // Nuevo campo
   const router = useRouter();
   const supabase = createClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       console.error("Error logging in:", error.message);
     } else {
@@ -34,15 +32,38 @@ const HeroSection = () => {
       alert("Las contraseñas no coinciden");
       return;
     }
-    const { error } = await supabase.auth.signUp({
+
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
     });
-    if (error) {
-      console.error("Error registering:", error.message);
-    } else {
-      router.push("/dashboard");
+
+    if (signUpError) {
+      console.error("Error al registrarse:", signUpError.message);
+      return;
     }
+
+    const userId = signUpData.user?.id;
+    if (!userId) {
+      alert("Hubo un problema al registrar el usuario.");
+      return;
+    }
+
+    const { error: profileError } = await supabase.from("profiles").insert([
+      {
+        id: userId,
+        username: username.trim(),
+      },
+    ]);
+
+    if (profileError) {
+      console.error("Error al crear el perfil:", profileError.message);
+      alert("Nombre de usuario en uso u otro error.");
+      return;
+    }
+
+    alert("Registro exitoso. Revisa tu correo para confirmar tu cuenta.");
+    setIsLogin(true);
   };
 
   const passwordsMatch = password === repeatPassword;
@@ -55,6 +76,19 @@ const HeroSection = () => {
         </h2>
 
         <form onSubmit={isLogin ? handleLogin : handleRegister} className="space-y-4">
+          {!isLogin && (
+            <div>
+              <Label htmlFor="username">Nombre de usuario</Label>
+              <Input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
+          )}
+
           <div>
             <Label htmlFor="email">Correo electrónico</Label>
             <Input
@@ -96,7 +130,7 @@ const HeroSection = () => {
           <Button
             type="submit"
             className="w-full"
-            disabled={!isLogin && !passwordsMatch} // deshabilitar si en registro y no coinciden
+            disabled={!isLogin && (!passwordsMatch || !username.trim())}
           >
             {isLogin ? "Entrar" : "Crear cuenta"}
           </Button>
@@ -111,6 +145,7 @@ const HeroSection = () => {
                   setIsLogin(false);
                   setPassword("");
                   setRepeatPassword("");
+                  setUsername("");
                 }}
                 className="text-blue-500 hover:underline"
                 type="button"
