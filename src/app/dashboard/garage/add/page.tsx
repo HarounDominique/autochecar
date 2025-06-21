@@ -6,54 +6,75 @@ import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import CustomButton from "@/components/ui/CustomButton";
-import SearchableSelect from "@/components/ui/SearchableSelect";
+
+type Brand = { id: number; name: string };
+type Automobile = { id: number; brand_id: number; name: string };
 
 export default function AddVehiclePage() {
   const [vehicleType, setVehicleType] = useState("car");
 
-  // Marcas, modelos y demás
-  const [brands, setBrands] = useState<string[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [automobiles, setAutomobiles] = useState<Automobile[]>([]);
+
   const [brand, setBrand] = useState("");
+  const [brandId, setBrandId] = useState<number | null>(null);
   const [showBrandList, setShowBrandList] = useState(false);
 
-  // ... otros estados
   const [model, setModel] = useState("");
+  const [models, setModels] = useState<string[]>([]);
+
   const [year, setYear] = useState("");
   const [cc, setCc] = useState("");
   const [power, setPower] = useState("");
   const [fuel, setFuel] = useState("gasoline");
   const [transmission, setTransmission] = useState("manual");
+
   const router = useRouter();
   const supabase = createClient();
 
-  // Fetch marcas al montar el componente
   useEffect(() => {
-    fetch("https://www.carqueryapi.com/api/0.3/?cmd=getMakes")
-      .then(res => res.text()) // Recibimos JSONP (texto)
-      .then(text => {
-        // La respuesta es JSONP, por ejemplo: callback({...})
-        // Extraemos el objeto JSON
-        const jsonStr = text.replace(/^callback\((.*)\);?$/, "$1");
-        const data = JSON.parse(jsonStr);
-        // data.Makes es el array con las marcas
-        const brandNames = data.Makes.map((make: any) => make.make_display);
-        setBrands(brandNames.sort());
-      })
-      .catch(console.error);
+    async function fetchData() {
+      const [brandRes, autoRes] = await Promise.all([
+        fetch("/data/brands.json"),
+        fetch("/data/automobiles.json"),
+      ]);
+      const brandData = await brandRes.json();
+      const autoData = await autoRes.json();
+
+      setBrands(brandData);
+      setAutomobiles(autoData);
+    }
+
+    fetchData();
   }, []);
 
-  // Filtrar marcas según lo que escribe el usuario (ignorando mayúsculas/minúsculas)
-  const filteredBrands = brands.filter(b =>
-    b.toLowerCase().includes(brand.toLowerCase())
-  );
+  const filteredBrands =
+    brand.trim().length === 0
+      ? []
+      : brands
+        .map((b) => b.name)
+        .filter((name) => name.toLowerCase().startsWith(brand.toLowerCase()));
 
-  // Manejo selección marca
   const selectBrand = (name: string) => {
     setBrand(name);
     setShowBrandList(false);
+
+    const selected = brands.find((b) => b.name === name);
+    if (selected) {
+      setBrandId(selected.id);
+
+      const modelsForBrand = automobiles
+        .filter((a) => a.brand_id === selected.id)
+        .map((a) => a.name);
+      setModels(modelsForBrand);
+    } else {
+      setBrandId(null);
+      setModels([]);
+    }
+
+    setModel(""); // Reset model on brand change
   };
 
-  // Ocultar lista si haces click fuera
   const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -103,6 +124,7 @@ export default function AddVehiclePage() {
     <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow rounded-lg">
       <h1 className="text-2xl font-bold mb-4">Añadir vehículo</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Tipo */}
         <div>
           <Label htmlFor="type">Tipo de vehículo</Label>
           <select
@@ -116,27 +138,57 @@ export default function AddVehiclePage() {
           </select>
         </div>
 
-        {/* Marca con autocompletado */}
-        <SearchableSelect
-          label="Marca"
-          options={brands}
-          value={brand}
-          onChange={setBrand}
-          required
-        />
+        {/* Marca */}
+        <div ref={containerRef}>
+          <Label htmlFor="brand">Marca</Label>
+          <input
+            type="text"
+            id="brand"
+            className="w-full border px-3 py-2 rounded-md"
+            value={brand}
+            onChange={(e) => {
+              setBrand(e.target.value);
+              setShowBrandList(true);
+            }}
+            autoComplete="off"
+            required
+          />
+          {showBrandList && filteredBrands.length > 0 && (
+            <ul className="border rounded-md mt-1 bg-white max-h-48 overflow-y-auto shadow">
+              {filteredBrands.map((b, i) => (
+                <li
+                  key={i}
+                  onClick={() => selectBrand(b)}
+                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                >
+                  {b}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
-        {/* De momento modelos, año, cilindrada, etc. igual que antes */}
-
+        {/* Modelo */}
         <div>
           <Label htmlFor="model">Modelo</Label>
-          <Input
+          <select
             id="model"
             value={model}
             onChange={(e) => setModel(e.target.value)}
+            className="w-full border px-3 py-2 rounded-md"
             required
-          />
+            disabled={models.length === 0}
+          >
+            <option value="">Selecciona un modelo</option>
+            {models.map((m, i) => (
+              <option key={i} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
         </div>
 
+        {/* Año */}
         <div>
           <Label htmlFor="year">Año</Label>
           <Input
@@ -148,6 +200,7 @@ export default function AddVehiclePage() {
           />
         </div>
 
+        {/* Cilindrada */}
         <div>
           <Label htmlFor="cc">Cilindrada (cc)</Label>
           <Input
@@ -159,6 +212,7 @@ export default function AddVehiclePage() {
           />
         </div>
 
+        {/* Potencia */}
         <div>
           <Label htmlFor="power">Potencia (CV)</Label>
           <Input
@@ -170,6 +224,7 @@ export default function AddVehiclePage() {
           />
         </div>
 
+        {/* Combustible */}
         <div>
           <Label htmlFor="fuel">Combustible</Label>
           <select
@@ -188,6 +243,7 @@ export default function AddVehiclePage() {
           </select>
         </div>
 
+        {/* Transmisión */}
         <div>
           <Label htmlFor="transmission">Cambio</Label>
           <select
