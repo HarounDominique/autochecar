@@ -32,6 +32,14 @@ export default function AddVehiclePage() {
   const router = useRouter();
   const supabase = createClient();
 
+  type GroupedModel = {
+    baseName: string;
+    yearRanges: string[];
+  };
+
+  const [groupedModels, setGroupedModels] = useState<GroupedModel[]>([]);
+  const [yearOptions, setYearOptions] = useState<string[]>([]);
+
   useEffect(() => {
     async function fetchData() {
       const [brandRes, autoRes] = await Promise.all([
@@ -53,27 +61,93 @@ export default function AddVehiclePage() {
       ? []
       : brands
         .map((b) => b.name)
-        .filter((name) => name.toLowerCase().startsWith(brand.toLowerCase()));
+        .filter((name) =>
+          name.toLowerCase().startsWith(brand.toLowerCase())
+        );
 
   const selectBrand = (name: string) => {
     setBrand(name);
     setShowBrandList(false);
 
     const selected = brands.find((b) => b.name === name);
-    if (selected) {
-      setBrandId(selected.id);
-
-      const modelsForBrand = automobiles
-        .filter((a) => a.brand_id === selected.id)
-        .map((a) => a.name);
-      setModels(modelsForBrand);
-    } else {
+    if (!selected) {
       setBrandId(null);
+      setGroupedModels([]);
       setModels([]);
+      return;
     }
 
-    setModel(""); // Reset model on brand change
+    setBrandId(selected.id);
+
+    const cleanModelName = (
+      rawName: string,
+      brandName: string
+    ): { base: string; yearRange: string | null } => {
+      let name = rawName
+        .replace(/<[^>]*>/g, "") // elimina etiquetas HTML
+        .replace(/Photos.*$/i, "")
+        .replace(/,?\s*engines.*$/i, "")
+        .trim();
+
+      const brandRegex = new RegExp(`^${brandName}\\s+`, "i");
+      name = name.replace(brandRegex, "").trim();
+
+      // Buscar año en cualquier parte, entre paréntesis o no
+      const yearMatch = name.match(/(\d{4}-(?:\d{4}|present))/i);
+      const yearRange = yearMatch ? yearMatch[1] : null;
+
+      // Quitar paréntesis que contengan años
+      name = name.replace(/\(?\d{4}-(?:\d{4}|present)\)?/gi, "").trim();
+
+      // Quitar prefijos de año si están fuera de paréntesis
+      name = name.replace(/^\d{4}\s*/, "").trim();
+
+      return {
+        base: name,
+        yearRange,
+      };
+    };
+
+    const modelMap: Record<string, Set<string>> = {};
+
+    automobiles
+      .filter((a) => a.brand_id === selected.id)
+      .forEach((a) => {
+        const { base, yearRange } = cleanModelName(a.name, selected.name);
+
+        if (!modelMap[base]) {
+          modelMap[base] = new Set();
+        }
+        if (yearRange) {
+          modelMap[base].add(yearRange);
+        }
+      });
+
+    const groupedList: GroupedModel[] = Object.entries(modelMap)
+      .map(([baseName, yearRangeSet]) => ({
+        baseName,
+        yearRanges: Array.from(yearRangeSet).sort((a, b) => {
+          const getStart = (range: string) =>
+            parseInt(range.split("-")[0], 10);
+          return getStart(a) - getStart(b);
+        }),
+      }))
+      .sort((a, b) => a.baseName.localeCompare(b.baseName));
+
+    setGroupedModels(groupedList);
+    setModel("");
+    setYear("");
+    setYearOptions([]);
   };
+
+  useEffect(() => {
+    const selected = groupedModels.find((m) => m.baseName === model);
+    if (selected) {
+      setYearOptions(selected.yearRanges);
+    } else {
+      setYearOptions([]);
+    }
+  }, [model, groupedModels]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -86,7 +160,8 @@ export default function AddVehiclePage() {
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -124,7 +199,6 @@ export default function AddVehiclePage() {
     <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow rounded-lg">
       <h1 className="text-2xl font-bold mb-4">Añadir vehículo</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Tipo */}
         <div>
           <Label htmlFor="type">Tipo de vehículo</Label>
           <select
@@ -138,7 +212,6 @@ export default function AddVehiclePage() {
           </select>
         </div>
 
-        {/* Marca */}
         <div ref={containerRef}>
           <Label htmlFor="brand">Marca</Label>
           <input
@@ -168,39 +241,47 @@ export default function AddVehiclePage() {
           )}
         </div>
 
-        {/* Modelo */}
         <div>
           <Label htmlFor="model">Modelo</Label>
           <select
             id="model"
             value={model}
-            onChange={(e) => setModel(e.target.value)}
+            onChange={(e) => {
+              setModel(e.target.value);
+              setYear("");
+            }}
             className="w-full border px-3 py-2 rounded-md"
             required
-            disabled={models.length === 0}
+            disabled={groupedModels.length === 0}
           >
             <option value="">Selecciona un modelo</option>
-            {models.map((m, i) => (
-              <option key={i} value={m}>
-                {m}
+            {groupedModels.map((m, i) => (
+              <option key={i} value={m.baseName}>
+                {m.baseName}
               </option>
             ))}
           </select>
         </div>
 
-        {/* Año */}
         <div>
           <Label htmlFor="year">Año</Label>
-          <Input
+          <select
             id="year"
-            type="number"
             value={year}
             onChange={(e) => setYear(e.target.value)}
+            className="w-full border px-3 py-2 rounded-md"
             required
-          />
+            disabled={!model}
+          >
+            <option value="">Selecciona un rango</option>
+            {yearOptions.map((range, i) => (
+              <option key={i} value={range}>
+                {range}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* Cilindrada */}
         <div>
           <Label htmlFor="cc">Cilindrada (cc)</Label>
           <Input
@@ -212,7 +293,6 @@ export default function AddVehiclePage() {
           />
         </div>
 
-        {/* Potencia */}
         <div>
           <Label htmlFor="power">Potencia (CV)</Label>
           <Input
@@ -224,7 +304,6 @@ export default function AddVehiclePage() {
           />
         </div>
 
-        {/* Combustible */}
         <div>
           <Label htmlFor="fuel">Combustible</Label>
           <select
@@ -243,7 +322,6 @@ export default function AddVehiclePage() {
           </select>
         </div>
 
-        {/* Transmisión */}
         <div>
           <Label htmlFor="transmission">Cambio</Label>
           <select
