@@ -7,60 +7,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import CustomButton from "@/components/ui/CustomButton";
 
-type Brand = { id: number; name: string };
-type Automobile = { id: number; brand_id: number; name: string };
-
 export default function AddVehiclePage() {
   const [vehicleType, setVehicleType] = useState("car");
-
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [automobiles, setAutomobiles] = useState<Automobile[]>([]);
-
   const [brand, setBrand] = useState("");
-  const [brandId, setBrandId] = useState<number | null>(null);
   const [showBrandList, setShowBrandList] = useState(false);
-
   const [model, setModel] = useState("");
   const [models, setModels] = useState<string[]>([]);
-
   const [year, setYear] = useState("");
   const [cc, setCc] = useState("");
   const [power, setPower] = useState("");
   const [fuel, setFuel] = useState("gasoline");
   const [transmission, setTransmission] = useState("manual");
 
+  const [brandModelData, setBrandModelData] = useState<{ brand: string; models: string[] }[]>([]);
+
   const router = useRouter();
   const supabase = createClient();
 
-  type GroupedModel = {
-    baseName: string;
-    yearRanges: string[];
-  };
-
-  const [groupedModels, setGroupedModels] = useState<GroupedModel[]>([]);
-  const [yearOptions, setYearOptions] = useState<string[]>([]);
-
   useEffect(() => {
     async function fetchData() {
-      const [brandRes, autoRes] = await Promise.all([
-        fetch("/data/brands.json"),
-        fetch("/data/automobiles.json"),
-      ]);
-      const brandData = await brandRes.json();
-      const autoData = await autoRes.json();
-
-      setBrands(brandData);
-      setAutomobiles(autoData);
+      const res = await fetch("/data/brandAndModel.json");
+      const data = await res.json();
+      setBrandModelData(data);
     }
-
     fetchData();
   }, []);
 
   const filteredBrands =
     brand.trim().length === 0
       ? []
-      : brands
-        .map((b) => b.name)
+      : brandModelData
+        .map((b) => b.brand)
         .filter((name) =>
           name.toLowerCase().startsWith(brand.toLowerCase())
         );
@@ -68,86 +45,15 @@ export default function AddVehiclePage() {
   const selectBrand = (name: string) => {
     setBrand(name);
     setShowBrandList(false);
-
-    const selected = brands.find((b) => b.name === name);
-    if (!selected) {
-      setBrandId(null);
-      setGroupedModels([]);
+    const selected = brandModelData.find((b) => b.brand === name);
+    if (selected) {
+      setModels(selected.models.sort((a, b) => a.localeCompare(b)));
+    } else {
       setModels([]);
-      return;
     }
-
-    setBrandId(selected.id);
-
-    const cleanModelName = (
-      rawName: string,
-      brandName: string
-    ): { base: string; yearRange: string | null } => {
-      let name = rawName
-        .replace(/<[^>]*>/g, "") // elimina etiquetas HTML
-        .replace(/Photos.*$/i, "")
-        .replace(/,?\s*engines.*$/i, "")
-        .trim();
-
-      const brandRegex = new RegExp(`^${brandName}\\s+`, "i");
-      name = name.replace(brandRegex, "").trim();
-
-      // Buscar año en cualquier parte, entre paréntesis o no
-      const yearMatch = name.match(/(\d{4}-(?:\d{4}|present))/i);
-      const yearRange = yearMatch ? yearMatch[1] : null;
-
-      // Quitar paréntesis que contengan años
-      name = name.replace(/\(?\d{4}-(?:\d{4}|present)\)?/gi, "").trim();
-
-      // Quitar prefijos de año si están fuera de paréntesis
-      name = name.replace(/^\d{4}\s*/, "").trim();
-
-      return {
-        base: name,
-        yearRange,
-      };
-    };
-
-    const modelMap: Record<string, Set<string>> = {};
-
-    automobiles
-      .filter((a) => a.brand_id === selected.id)
-      .forEach((a) => {
-        const { base, yearRange } = cleanModelName(a.name, selected.name);
-
-        if (!modelMap[base]) {
-          modelMap[base] = new Set();
-        }
-        if (yearRange) {
-          modelMap[base].add(yearRange);
-        }
-      });
-
-    const groupedList: GroupedModel[] = Object.entries(modelMap)
-      .map(([baseName, yearRangeSet]) => ({
-        baseName,
-        yearRanges: Array.from(yearRangeSet).sort((a, b) => {
-          const getStart = (range: string) =>
-            parseInt(range.split("-")[0], 10);
-          return getStart(a) - getStart(b);
-        }),
-      }))
-      .sort((a, b) => a.baseName.localeCompare(b.baseName));
-
-    setGroupedModels(groupedList);
     setModel("");
     setYear("");
-    setYearOptions([]);
   };
-
-  useEffect(() => {
-    const selected = groupedModels.find((m) => m.baseName === model);
-    if (selected) {
-      setYearOptions(selected.yearRanges);
-    } else {
-      setYearOptions([]);
-    }
-  }, [model, groupedModels]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -252,12 +158,12 @@ export default function AddVehiclePage() {
             }}
             className="w-full border px-3 py-2 rounded-md"
             required
-            disabled={groupedModels.length === 0}
+            disabled={models.length === 0}
           >
             <option value="">Selecciona un modelo</option>
-            {groupedModels.map((m, i) => (
-              <option key={i} value={m.baseName}>
-                {m.baseName}
+            {models.map((m, i) => (
+              <option key={i} value={m}>
+                {m}
               </option>
             ))}
           </select>
@@ -265,21 +171,13 @@ export default function AddVehiclePage() {
 
         <div>
           <Label htmlFor="year">Año</Label>
-          <select
+          <Input
             id="year"
+            type="number"
             value={year}
             onChange={(e) => setYear(e.target.value)}
-            className="w-full border px-3 py-2 rounded-md"
             required
-            disabled={!model}
-          >
-            <option value="">Selecciona un rango</option>
-            {yearOptions.map((range, i) => (
-              <option key={i} value={range}>
-                {range}
-              </option>
-            ))}
-          </select>
+          />
         </div>
 
         <div>
