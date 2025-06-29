@@ -21,7 +21,6 @@
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "components": "link:@/components",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.39.3",
@@ -36,7 +35,9 @@
     "pg": "^8.13.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-icons": "^5.4.0",
+    "react-icons": "^5.5.0",
+    "react-simple-icons": "^1.0.0-beta.5",
+    "simple-icons": "^15.4.0",
     "stripe": "^17.6.0",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7"
