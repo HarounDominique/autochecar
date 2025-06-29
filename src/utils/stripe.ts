@@ -1,12 +1,11 @@
-import { type Stripe, loadStripe } from "@stripe/stripe-js";
+import Stripe from "stripe";
 
-let stripePromise: Promise<Stripe | null>;
-
-export const getStripe = () => {
-  if (!stripePromise) {
-    stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+export function getStripeClient() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error("Missing STRIPE_SECRET_KEY env var");
   }
-  return stripePromise;
-};
 
-export const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2025-05-28.basil",
+  });
+}
