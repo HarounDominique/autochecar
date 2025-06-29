@@ -6,13 +6,20 @@ import { createClient } from "@/lib/supabase/client";
 import CustomButton from "@/components/ui/CustomButton";
 import { FaCar, FaMotorcycle } from "react-icons/fa";
 import * as simpleIcons from "simple-icons";
+import { CarDetailModal } from "@/components/CarDetailModal/CarDetailModal";
 
 type Vehicle = {
-  id: number;
+  id: string;
+  user_id: string;
   brand: string;
   model: string;
-  year?: number;
-  type: "car" | "motorcycle" | string;
+  year: number;
+  type: "car" | "motorcycle";
+  displacement: number;
+  power: number;
+  fuel: string;
+  transmission: string;
+  created_at: string;
 };
 
 function MarcaIcon({ brand }: { brand: string }) {
@@ -35,7 +42,7 @@ function MarcaIcon({ brand }: { brand: string }) {
     title: string;
   };
 
-  const pathMatch = svg.match(/<path d="([^"]+)"\/>/);
+  const pathMatch = svg.match(/<path d=\"([^\"]+)\"\/>/);
   const pathData = pathMatch ? pathMatch[1] : "";
 
   return (
@@ -60,6 +67,7 @@ export default function GaragePage() {
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -112,7 +120,8 @@ export default function GaragePage() {
           {vehicles.map((v) => (
             <div
               key={v.id}
-              className="border rounded-lg shadow-sm bg-white flex flex-col items-center justify-center gap-4 p-6 aspect-square"
+              onClick={() => setSelectedVehicle(v)}
+              className="cursor-pointer border rounded-lg shadow-sm bg-white flex flex-col items-center justify-center gap-4 p-6 aspect-square hover:shadow-md transition"
             >
               {v.type === "car" ? (
                 <FaCar className="text-3xl text-blue-600" />
@@ -128,11 +137,21 @@ export default function GaragePage() {
                 <h2 className="text-lg font-semibold">
                   {v.brand} {v.model}
                 </h2>
-                {v.year && <p className="text-sm text-gray-600">Año: {v.year}</p>}
+                {v.year && (
+                  <p className="text-sm text-gray-600">Año: {v.year}</p>
+                )}
               </div>
             </div>
           ))}
         </div>
+      )}
+
+      {selectedVehicle && (
+        <CarDetailModal
+          vehicle={selectedVehicle}
+          onClose={() => setSelectedVehicle(null)}
+          open={true}
+        />
       )}
     </div>
   );

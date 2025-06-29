@@ -10,7 +10,9 @@
     "format": "prettier . --write"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.4",
     "@radix-ui/react-avatar": "^1.1.2",
+    "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-label": "^2.1.1",
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-tabs": "^1.1.2",
@@ -21,6 +23,7 @@
     "axios": "1.8.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "components": "link:@/components",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.39.3",
