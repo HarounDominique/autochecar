@@ -1,19 +1,7 @@
-/*
-
-NOTE: 
-
-If you have email confirmation turned on (the default), 
-a new user will receive an email confirmation after signing up.
-Change the email template to support a server-side authentication flow.
-Go to the Auth templates page in your dashboard. In the Confirm signup template,
-change {{ .ConfirmationURL }} to {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email. 
-
-*/
-
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { type NextRequest } from "next/server";
-
-import { createClient } from "@/lib/supabase/server";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function GET(request: NextRequest) {
@@ -23,16 +11,17 @@ export async function GET(request: NextRequest) {
   const next = searchParams.get("next") ?? "/dashboard";
 
   if (token_hash && type) {
-    const supabase = await createClient();
+    const supabase = createRouteHandlerClient({ cookies: cookies() });
 
     const { error } = await supabase.auth.verifyOtp({
       type,
       token_hash,
     });
+
     if (!error) {
-      redirect(next);
+      return redirect(next);
     }
   }
 
-  redirect("/error");
+  return redirect("/error");
 }

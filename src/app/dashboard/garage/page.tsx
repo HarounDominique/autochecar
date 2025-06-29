@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import CustomButton from "@/components/ui/CustomButton";
 import { FaCar, FaMotorcycle } from "react-icons/fa";
-
-// Importa todas las marcas de simple-icons
 import * as simpleIcons from "simple-icons";
 
 type Vehicle = {
@@ -20,18 +18,6 @@ type Vehicle = {
 function MarcaIcon({ brand }: { brand: string }) {
   if (!brand) return null;
 
-  // Normalizamos la marca para buscar en simple-icons (sin espacios, lowercase)
-  const key = brand
-    .toLowerCase()
-    .replace(/\s+/g, "")
-    .replace(/\./g, ""); // Quitar puntos por ejemplo en marcas como "Land Rover"
-
-  // Buscamos el icono: simple-icons exporta objetos con keys como 'siToyota'
-  // El nombre de la constante es en formato camel case con prefijo 'si'
-  // Ejemplo: 'siToyota', 'siVolkswagen', etc.
-
-  // Buscamos por coincidencia insensible:
-  // Hay que iterar sobre simpleIcons para buscar la marca correcta
   const iconEntry = Object.values(simpleIcons).find(
     (icon) =>
       typeof icon === "object" &&
@@ -40,21 +26,14 @@ function MarcaIcon({ brand }: { brand: string }) {
   );
 
   if (!iconEntry) {
-    // No encontrado, fallback:
     return <span className="text-gray-400 text-2xl">🚗</span>;
   }
 
-  // Icono encontrado: iconEntry.svg es el path SVG, iconEntry.hex el color
   const { hex, svg, title } = iconEntry as {
     hex: string;
     svg: string;
     title: string;
   };
-
-  // El svg viene con la etiqueta <svg ...> completa, pero solo queremos el path
-  // Para evitar duplicar svg, extraemos solo el path content
-  // SVG viene tipo: <svg role="img" ...><title>Title</title><path d="..."/></svg>
-  // Vamos a extraer la parte del path con regex simple
 
   const pathMatch = svg.match(/<path d="([^"]+)"\/>/);
   const pathData = pathMatch ? pathMatch[1] : "";
@@ -129,23 +108,23 @@ export default function GaragePage() {
       ) : vehicles.length === 0 ? (
         <p className="text-gray-500 italic">*sonido de grillos*</p>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid grid-cols-2 gap-6">
           {vehicles.map((v) => (
             <div
               key={v.id}
-              className="border p-4 rounded-lg shadow-sm bg-white flex items-center gap-4"
+              className="border rounded-lg shadow-sm bg-white flex flex-col items-center justify-center gap-4 p-6 aspect-square"
             >
               {v.type === "car" ? (
-                <FaCar className="text-2xl text-blue-600" />
+                <FaCar className="text-3xl text-blue-600" />
               ) : v.type === "motorcycle" ? (
-                <FaMotorcycle className="text-2xl text-green-600" />
+                <FaMotorcycle className="text-3xl text-green-600" />
               ) : (
-                <span className="text-gray-400 text-2xl">🚗</span>
+                <span className="text-gray-400 text-3xl">🚗</span>
               )}
 
               <MarcaIcon brand={v.brand} />
 
-              <div>
+              <div className="text-center">
                 <h2 className="text-lg font-semibold">
                   {v.brand} {v.model}
                 </h2>
