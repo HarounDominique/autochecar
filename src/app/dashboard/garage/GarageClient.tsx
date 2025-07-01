@@ -68,6 +68,11 @@ export default function GarageClient() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const handleVehicleDeleted = (deletedId: string) => {
+    setVehicles((prev) => prev.filter((v) => v.id !== deletedId));
+    setSelectedVehicle(null); // Cierra modal si está abierto
+  };
+
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -157,6 +162,10 @@ export default function GarageClient() {
           vehicle={selectedVehicle}
           onClose={() => setSelectedVehicle(null)}
           open={true}
+          onDelete={(deletedId) => {
+            setVehicles((prev) => prev.filter((v) => v.id !== deletedId));
+            setSelectedVehicle(null); // opcional, asegura que se cierra
+          }}
         />
       )}
     </div>
