@@ -108,14 +108,18 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <Button type="submit" className="w-full bg-blue-500 text-white hover:bg-blue-600" disabled={!passwordsMatch || !username.trim()}>
+            <Button
+              type="submit"
+              className="w-full bg-[#83bf4f] text-white hover:bg-[#74a843]"
+              disabled={!passwordsMatch || !username.trim()}
+            >
               Registrarse
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-600">
             ¿Ya tienes cuenta?{" "}
-            <a href="/auth/login" className="text-blue-500 hover:underline">
+            <a href="/auth/login" className="text-[#83bf4f] hover:underline">
               Inicia sesión
             </a>
           </p>

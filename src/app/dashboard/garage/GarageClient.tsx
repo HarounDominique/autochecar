@@ -107,8 +107,14 @@ export default function GarageClient() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Mi Garaje</h1>
-        <CustomButton text="Añadir vehículo" onClick={handleAddVehicle} />
+        <h1 className="text-2xl font-bold">Garaje</h1>
+        <div className="ml-4">
+          <CustomButton
+            text="Añadir vehículo"
+            onClick={handleAddVehicle}
+            className="!w-auto !px-4 !py-2 text-sm"
+          />
+        </div>
       </div>
 
       {loading ? (

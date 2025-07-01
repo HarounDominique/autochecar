@@ -18,10 +18,10 @@ export default function CustomButton({
                                        className = "",
                                      }: ButtonProps) {
   const baseStyle =
-    "px-4 py-2 font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
+    "w-full px-4 py-2 font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
 
   const variants = {
-    primary: "bg-[#007BFF] text-white hover:bg-[#006ae6] focus:ring-[#007BFF]",
+    primary: "bg-[#83bf4f] text-white hover:bg-[#74a843] focus:ring-[#83bf4f] border border-transparent",
     danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
     secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-400",
   };

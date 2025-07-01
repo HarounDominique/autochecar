@@ -78,7 +78,7 @@ export default function Sidebar() {
                 pathname === "/dashboard/garage" ? "bg-gray-100 font-semibold" : ""
               }`}
             >
-              Mi Garaje
+              Garaje
             </Link>
 
             <Link

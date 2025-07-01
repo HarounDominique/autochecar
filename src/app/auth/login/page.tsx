@@ -57,14 +57,14 @@ export default function LoginPage() {
               />
             </div>
 
-            <Button type="submit" className="w-full bg-blue-500 text-white hover:bg-blue-600">
+            <Button type="submit" className="w-full bg-[#83bf4f] text-white hover:bg-[#74a843]">
               Entrar
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-600">
             ¿No tienes cuenta?{" "}
-            <a href="/auth/register" className="text-blue-500 hover:underline">
+            <a href="/auth/register" className="text-[#83bf4f] hover:underline">
               Regístrate
             </a>
           </p>
