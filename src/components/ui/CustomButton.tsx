@@ -5,7 +5,7 @@ import React from "react";
 type ButtonProps = {
   text: string;
   variant?: "primary" | "danger" | "secondary";
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   type?: "button" | "submit" | "reset"; // ✅ soporte para formularios
   className?: string;
 };
@@ -26,12 +26,12 @@ export default function CustomButton({
     secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-400",
   };
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (variant === "danger") {
       const confirmed = confirm("¿Estás seguro de que deseas realizar esta acción?");
       if (!confirmed) return;
     }
-    onClick?.();
+    onClick?.(e);
   };
 
   return (

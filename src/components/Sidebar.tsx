@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import CustomButton from "@/components/ui/CustomButton";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -99,9 +100,7 @@ export default function Sidebar() {
             <Button onClick={handleLoginClick} className="w-full" variant="outline">
               Iniciar sesión
             </Button>
-            <Button onClick={handleRegisterClick} className="w-full">
-              Registrarse
-            </Button>
+            <CustomButton text="Registrarse" onClick={handleRegisterClick} className="w-full"/>
           </>
         )}
       </div>
