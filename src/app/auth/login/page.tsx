@@ -57,7 +57,7 @@ export default function LoginPage() {
               />
             </div>
 
-            <Button type="submit" className="w-full text-blue-500">
+            <Button type="submit" className="w-full bg-blue-500 text-white hover:bg-blue-600">
               Entrar
             </Button>
           </form>

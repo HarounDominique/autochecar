@@ -108,7 +108,7 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={!passwordsMatch || !username.trim()}>
+            <Button type="submit" className="w-full bg-blue-500 text-white hover:bg-blue-600" disabled={!passwordsMatch || !username.trim()}>
               Registrarse
             </Button>
           </form>
