@@ -1,27 +1,12 @@
-import { Metadata } from "next";
-import CTA from "@/app/(site)/Cta";
-import FAQ from "@/app/(site)/Faq";
-import FeaturedTime from "@/app/(site)/FeaturedTime";
-import Footer from "@/app/(site)/Footer";
-import HeroSection from "@/app/(site)/Hero";
-import MakerIntro from "@/app/(site)/MakerIntro";
-import Navbar from "@/app/(site)/Navbar";
-import PricingSection from "@/app/(site)/pricing";
-import TestimonialsPage from "@/app/(site)/Testimonials";
-
-// required by Nextra
-export const metadata: Metadata = {
-  title: "ShipFree",
-};
+import DashboardLayout from "./dashboard/layout";
 
 export default function Home() {
   return (
-    <div className="bg-[#212121]">
-      {//<Navbar />
-      }
-      <HeroSection />
-      {//<Footer />
-      }
-    </div>
+    <DashboardLayout>
+      <div className="p-6">
+        <h1 className="text-3xl font-bold mb-4 text-white">Bienvenido a Autochecar</h1>
+        <p className="text-white">Usa el menú para navegar o iniciar sesión.</p>
+      </div>
+    </DashboardLayout>
   );
 }

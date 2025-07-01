@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Tu app",
-  description: "Descripción de la app",
+  title: "autochecar",
+  description: "Toda la información que necesitas sobre vehículos",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
