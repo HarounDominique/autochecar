@@ -1,128 +1,57 @@
-# ⚡ ShipFree
+# Autochecar - Comunidad y Datos sobre Vehículos
 
-Hi there! 👋
-
-ShipFree is a free alternative to ShipFast, designed to simplify and optimize your shipping process. It’s built using modern web technologies like Next.js, Supabase, Stripe, LemonSqueezy, Drizzle ORM and Mailgun.
-
-## Features
-
-- SEO Optimisation
-- User authentication with Supabase
-- Stripe and LemonSqueezy integration
-- Email notifications via Mailgun
-- Modern UI built with Next.js and TailwindCSS
-
-## Docker Setup
-
-ShipFree provides Docker configurations for both **development** and **production** environments. Below, you'll find the structure of the Docker files and the commands to get started.
-
-### Docker File Structure
-
-The Docker files are organized as follows:
-
-```
-docker
-├── dev
-│   ├── Dockerfile                  # Dockerfile for development
-│   ├── docker-compose.yml          # Base development setup
-│   ├── docker-compose.mongodb.yml  # Development setup with MongoDB
-│   └── docker-compose.postgres.yml # Development setup with PostgreSQL
-└── prod
-    ├── Dockerfile                  # Dockerfile for production
-    ├── docker-compose.yml          # Base production setup
-    ├── docker-compose.mongodb.yml  # Production setup with MongoDB
-    └── docker-compose.postgres.yml # Production setup with PostgreSQL
-```
-
-### Development Environment
-
-In development, the project runs in **watch mode**, meaning it automatically detects changes in your code and rebuilds the application. This is ideal for local development but should **never** be used in production.
-
-#### Commands for Development
-
-1. **Base Setup** (without a database):
-
-   ```bash
-   docker-compose -f docker/dev/docker-compose.yml up --build
-   ```
-
-2. **With PostgreSQL**:
-
-   ```bash
-   docker-compose -f docker/dev/docker-compose.yml -f docker/dev/docker-compose.postgres.yml up --build
-   ```
-
-3. **With MongoDB**:
-   ```bash
-   docker-compose -f docker/dev/docker-compose.yml -f docker/dev/docker-compose.mongodb.yml up --build
-   ```
-
-#### Why Watch Mode?
-
-- **Watch mode** ensures that your changes are reflected in real-time without manually restarting the server.
-- It’s perfect for development but **not suitable for production** due to performance and security concerns.
+**Autochecar** es una web abierta al público general destinada a facilitar la consulta y el aporte colaborativo de información variada sobre vehículos. Nuestro objetivo es crear una comunidad donde usuarios puedan compartir experiencias reales, datos técnicos y consejos útiles relacionados con sus coches y motos.
 
 ---
 
-### Production Environment
+## ¿Qué puedes hacer en Autochecar?
 
-The production environment is optimized for performance and security. It uses a multi-stage build to reduce the image size and includes only the necessary dependencies.
-
-#### Commands for Production
-
-1. **Base Setup** (without a database):
-
-   ```bash
-   docker-compose -f docker/prod/docker-compose.yml up --build -d
-   ```
-
-2. **With PostgreSQL**:
-
-   ```bash
-   docker-compose -f docker/prod/docker-compose.yml -f docker/prod/docker-compose.postgres.yml up --build -d
-   ```
-
-3. **With MongoDB**:
-   ```bash
-   docker-compose -f docker/prod/docker-compose.yml -f docker/prod/docker-compose.mongodb.yml up --build -d
-   ```
-
-#### Key Differences in Production
-
-- **No watch mode**: The application is pre-built, and changes require a rebuild.
-- **Optimized images**: Smaller image size and faster startup times.
-- **Environment variables**: Ensure all required variables (e.g., `DATABASE_URL`, `API_KEY`) are set.
+- Consultar consumos reales reportados por otros usuarios.
+- Conocer fallas y averías típicas de distintos modelos y marcas.
+- Explorar posibles orígenes y causas de problemas comunes.
+- Compartir soluciones, reparaciones y prevenciones basadas en la experiencia.
+- Añadir tus propios vehículos y contribuir con información valiosa.
+- Visualizar detalles técnicos y específicos de cada vehículo.
 
 ---
 
-### Portainer Integration
+## Tecnologías usadas
 
-Portainer is included in both development and production setups to help you manage your Docker containers via a web interface.
-
-- **Access Portainer**: `http://localhost:9000`
-- **Default credentials**: Set up during the first login.
-
----
-
-### Disclaimer
-
-- **Development Mode**: Uses watch mode for real-time updates. Not suitable for production.
-- **Production Mode**: Optimized for performance and security. Requires a rebuild for changes.
+- Frontend: React / Next.js (con componentes UI personalizados)
+- Backend: Supabase (autenticación, base de datos, API)
+- Librerías auxiliares: simple-icons, react-icons, lucide-react
 
 ---
 
-## Docs
+## Instalación y desarrollo local
 
-For full documentation, visit: [ShipFree Docs](https://shipfree.idee8.agency/docs)
+1. Clona el repositorio  
+   `git clone https://github.com/tu-usuario/autochecar.git`
 
-## Code of Conduct
+2. Instala dependencias  
+   `npm install` o `yarn install`
 
-Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
+3. Configura las variables de entorno para Supabase en `.env.local`
 
-## Contributing
+4. Levanta la aplicación  
+   `npm run dev` o `yarn dev`
 
-For people who want to contribute, please refer to [CONTRIBUTING.md](CONTRIBUTING.md).
+5. Accede a `http://localhost:3000`
 
 ---
 
-Cooked for you with ❤️ by [Idee8](https://idee8.agency)
+## Contribuciones
+
+¡Las contribuciones son bienvenidas! Puedes abrir issues o enviar pull requests con mejoras, nuevas funcionalidades o correcciones.
+
+---
+
+## Licencia
+
+© 2025 Tu Nombre / Tu Empresa. Todos los derechos reservados.
+
+---
+
+Si tienes alguna duda o sugerencia, contacta conmigo vía [tu-email@dominio.com] o crea un issue.
+
+¡Gracias por formar parte de esta comunidad!
