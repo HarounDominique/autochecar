@@ -44,6 +44,11 @@ function MarcaIcon({ brand }: { brand: string }) {
 
   const pathMatch = svg.match(/<path d=\"([^\"]+)\"\/>/);
   const pathData = pathMatch ? pathMatch[1] : "";
+  const handleVehicleDeleted = (deletedId: string) => {
+    setVehicles((v) => v.filter((veh) => veh.id !== deletedId));
+    setSelectedVehicle(null);
+  };
+
 
   return (
     <svg
@@ -162,10 +167,7 @@ export default function GarageClient() {
           vehicle={selectedVehicle}
           onClose={() => setSelectedVehicle(null)}
           open={true}
-          onDelete={(deletedId) => {
-            setVehicles((prev) => prev.filter((v) => v.id !== deletedId));
-            setSelectedVehicle(null); // opcional, asegura que se cierra
-          }}
+          onDelete={handleVehicleDeleted} 
         />
       )}
     </div>
