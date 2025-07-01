@@ -43,7 +43,7 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-gray-600">
           ¿No tienes cuenta?{' '}
-          <a href="/register" className="text-blue-500 hover:underline">Regístrate</a>
+          <a href="/auth/register" className="text-blue-500 hover:underline">Regístrate</a>
         </p>
       </div>
     </div>

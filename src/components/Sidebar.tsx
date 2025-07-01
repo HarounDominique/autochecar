@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const supabase = createClient();
   const [user, setUser] = useState<any>(null);
 
@@ -20,6 +21,19 @@ export default function Sidebar() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    // Refresca para que la app recargue estado
+    window.location.reload();
+  };
+
+  const handleLoginClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    router.push("/auth/login");
+    // Opcional: no hace falta reload aquí si login te redirige al dashboard y el sidebar se actualiza
+  };
+
+  const handleRegisterClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    router.push("/auth/register");
   };
 
   return (
@@ -71,19 +85,23 @@ export default function Sidebar() {
       <div className="space-y-2">
         {user ? (
           <>
-            <p className="text-sm text-gray-600 px-3">Sesión iniciada como<br /><span className="font-medium">{user.email}</span></p>
+            <p className="text-sm text-gray-600 px-3">
+              Sesión iniciada como
+              <br />
+              <span className="font-medium">{user.email}</span>
+            </p>
             <Button onClick={handleLogout} className="w-full mt-2" variant="outline">
               Cerrar sesión
             </Button>
           </>
         ) : (
           <>
-            <Link href="/auth/login">
-              <Button className="w-full" variant="outline">Iniciar sesión</Button>
-            </Link>
-            <Link href="/auth/register">
-              <Button className="w-full">Registrarse</Button>
-            </Link>
+            <Button onClick={handleLoginClick} className="w-full" variant="outline">
+              Iniciar sesión
+            </Button>
+            <Button onClick={handleRegisterClick} className="w-full">
+              Registrarse
+            </Button>
           </>
         )}
       </div>
