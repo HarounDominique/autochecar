@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Vehicle } from "@/types/vehicle";
 import {
   Dialog,
@@ -34,10 +34,23 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
                                                               }) => {
   const [deleting, setDeleting] = useState(false);
   const [openAddFaultModal, setOpenAddFaultModal] = useState(false);
-  const [faultDescription, setFaultDescription] = useState("");
   const [savingFault, setSavingFault] = useState(false);
+  const [knowsOrigin, setKnowsOrigin] = useState<null | boolean>(null);
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
 
   const supabase = createClient();
+
+  useEffect(() => {
+    if (openAddFaultModal && knowsOrigin === true) {
+      fetchCategories();
+    }
+  }, [openAddFaultModal, knowsOrigin]);
+
+  const fetchCategories = async () => {
+    const { data, error } = await supabase.from("fault_categories").select("id, name");
+    if (!error && data) setCategories(data);
+  };
 
   const handleDelete = async () => {
     const confirmed = confirm(
@@ -48,10 +61,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
     setDeleting(true);
 
     try {
-      const { error } = await supabase
-        .from("vehicles")
-        .delete()
-        .eq("id", vehicle.id);
+      const { error } = await supabase.from("vehicles").delete().eq("id", vehicle.id);
 
       if (error) {
         console.error("Error al eliminar vehículo:", error.message);
@@ -74,8 +84,8 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
   };
 
   const handleSaveFault = async () => {
-    if (faultDescription.trim() === "") {
-      alert("Por favor, describe la avería.");
+    if (!selectedCategoryId) {
+      alert("Por favor, selecciona una categoría de avería.");
       return;
     }
 
@@ -84,7 +94,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
     try {
       const { error } = await supabase.from("faults").insert({
         vehicle_id: vehicle.id,
-        description: faultDescription.trim(),
+        fault_category_id: selectedCategoryId,
         created_at: new Date().toISOString(),
       });
 
@@ -93,8 +103,9 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
         alert("Error al guardar la avería.");
       } else {
         alert("Avería guardada correctamente.");
-        setFaultDescription("");
         setOpenAddFaultModal(false);
+        setKnowsOrigin(null);
+        setSelectedCategoryId(null);
       }
     } catch (err) {
       console.error("Error inesperado:", err);
@@ -164,8 +175,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
               <strong>Transmisión:</strong> {vehicle.transmission}
             </div>
             <div>
-              <strong>Fecha de alta:</strong>{" "}
-              {new Date(vehicle.created_at).toLocaleDateString()}
+              <strong>Fecha de alta:</strong> {new Date(vehicle.created_at).toLocaleDateString()}
             </div>
           </div>
         </DialogContent>
@@ -178,19 +188,30 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
             <DialogTitle>Añadir avería para {vehicle.brand} {vehicle.model}</DialogTitle>
           </DialogHeader>
 
-          <div className="mt-4">
-            <label htmlFor="faultDescription" className="block font-semibold mb-2">
-              Descripción de la avería
-            </label>
-            <textarea
-              id="faultDescription"
-              rows={6}
-              className="w-full border rounded-md p-2 resize-none"
-              value={faultDescription}
-              onChange={(e) => setFaultDescription(e.target.value)}
-              placeholder="Describe la avería o fallo..."
-              disabled={savingFault}
-            />
+          <div className="mt-6 space-y-4">
+            <p className="font-semibold">¿Conoces el origen de la avería?</p>
+            <div className="flex gap-4">
+              <Button variant={knowsOrigin === true ? "default" : "outline"} onClick={() => setKnowsOrigin(true)}>Sí</Button>
+              <Button variant={knowsOrigin === false ? "default" : "outline"} onClick={() => setKnowsOrigin(false)}>No</Button>
+            </div>
+
+            {knowsOrigin === true && (
+              <div className="mt-4">
+                <label className="block font-semibold mb-2">Sistema afectado</label>
+                <select
+                  className="w-full border rounded-md p-2"
+                  value={selectedCategoryId || ""}
+                  onChange={(e) => setSelectedCategoryId(Number(e.target.value))}
+                >
+                  <option value="">Selecciona una categoría</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           <DialogFooter className="mt-6 flex justify-end gap-2">
@@ -201,7 +222,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
             >
               Cancelar
             </Button>
-            <Button onClick={handleSaveFault} disabled={savingFault}>
+            <Button onClick={handleSaveFault} disabled={savingFault || knowsOrigin !== true}>
               {savingFault ? "Guardando..." : "Guardar"}
             </Button>
           </DialogFooter>
