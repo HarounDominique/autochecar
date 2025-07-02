@@ -14,15 +14,28 @@ export default function Sidebar() {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
+    // Obtiene el usuario actual al montar
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
     });
-  }, []);
+
+    // Escucha cambios en el estado de autenticación
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Limpia la suscripción al desmontar
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
-    window.location.reload();
+    router.push("/"); // Redirige a inicio tras logout
   };
 
   const handleLoginClick = (e: React.MouseEvent) => {
@@ -119,7 +132,11 @@ export default function Sidebar() {
             <Button onClick={handleLoginClick} className="w-full" variant="outline">
               Iniciar sesión
             </Button>
-            <CustomButton text="Registrarse" onClick={handleRegisterClick} className="w-full" />
+            <CustomButton
+              text="Registrarse"
+              onClick={handleRegisterClick}
+              className="w-full"
+            />
           </>
         )}
       </div>

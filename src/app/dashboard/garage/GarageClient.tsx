@@ -33,7 +33,7 @@ function MarcaIcon({ brand }: { brand: string }) {
   );
 
   if (!iconEntry) {
-    return <span className="text-gray-400 text-2xl">🚗</span>;
+    return <span className="text-gray-400 text-2xl">Missing icon</span>;
   }
 
   const { hex, svg, title } = iconEntry as {
@@ -44,11 +44,6 @@ function MarcaIcon({ brand }: { brand: string }) {
 
   const pathMatch = svg.match(/<path d=\"([^\"]+)\"\/>/);
   const pathData = pathMatch ? pathMatch[1] : "";
-  const handleVehicleDeleted = (deletedId: string) => {
-    setVehicles((v) => v.filter((veh) => veh.id !== deletedId));
-    setSelectedVehicle(null);
-  };
-
 
   return (
     <svg
@@ -73,11 +68,6 @@ export default function GarageClient() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
-  const handleVehicleDeleted = (deletedId: string) => {
-    setVehicles((prev) => prev.filter((v) => v.id !== deletedId));
-    setSelectedVehicle(null); // Cierra modal si está abierto
-  };
-
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -112,6 +102,11 @@ export default function GarageClient() {
 
   const handleAddVehicle = () => {
     router.push("/dashboard/garage/add");
+  };
+
+  const handleVehicleDeleted = (deletedId: string) => {
+    setVehicles((prev) => prev.filter((v) => v.id !== deletedId));
+    setSelectedVehicle(null); // Cierra modal si está abierto
   };
 
   return (
@@ -167,7 +162,7 @@ export default function GarageClient() {
           vehicle={selectedVehicle}
           onClose={() => setSelectedVehicle(null)}
           open={true}
-          onDelete={handleVehicleDeleted} 
+          onDelete={handleVehicleDeleted}
         />
       )}
     </div>
