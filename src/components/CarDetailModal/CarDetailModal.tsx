@@ -38,6 +38,9 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
   const [knowsOrigin, setKnowsOrigin] = useState<null | boolean>(null);
   const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [partDescription, setPartDescription] = useState("");
+  const [faultDescription, setFaultDescription] = useState("");
+
 
   const supabase = createClient();
 
@@ -84,17 +87,56 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
   };
 
   const handleSaveFault = async () => {
-    if (!selectedCategoryId) {
+    if (knowsOrigin === null) {
+      alert("Por favor, indica si conoces el origen de la avería.");
+      return;
+    }
+
+    if (knowsOrigin === true && !selectedCategoryId) {
       alert("Por favor, selecciona una categoría de avería.");
+      return;
+    }
+
+    if (faultDescription.trim() === "") {
+      alert("Por favor, describe la avería.");
       return;
     }
 
     setSavingFault(true);
 
     try {
-      const { error } = await supabase.from("faults").insert({
+      // Obtener usuario actual
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        alert("No se pudo identificar el usuario. Por favor, inicia sesión.");
+        setSavingFault(false);
+        return;
+      }
+
+      // Crear snapshot del vehículo
+      const vehicleSnapshot = {
+        brand: vehicle.brand,
+        model: vehicle.model,
+        year: vehicle.year,
+        displacement: vehicle.displacement,
+        power: vehicle.power,
+        fuel: vehicle.fuel,
+        transmission: vehicle.transmission,
+        type: vehicle.type,
+      };
+
+      const { error } = await supabase.from("fault_reports").insert({
         vehicle_id: vehicle.id,
-        fault_category_id: selectedCategoryId,
+        user_id: user.id,
+        knows_origin: knowsOrigin,
+        category_id: knowsOrigin ? selectedCategoryId : null,
+        part_description: partDescription.trim() || null,
+        fault_description: faultDescription.trim(),
+        vehicle_snapshot: vehicleSnapshot,
         created_at: new Date().toISOString(),
       });
 
@@ -103,9 +145,12 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
         alert("Error al guardar la avería.");
       } else {
         alert("Avería guardada correctamente.");
+        // Reset form
         setOpenAddFaultModal(false);
         setKnowsOrigin(null);
         setSelectedCategoryId(null);
+        setPartDescription("");
+        setFaultDescription("");
       }
     } catch (err) {
       console.error("Error inesperado:", err);
@@ -213,6 +258,34 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
               </div>
             )}
           </div>
+
+          {knowsOrigin !== null && (
+            <>
+              <div className="mt-4">
+                <label className="block font-semibold mb-2">Descripción de la pieza(s) afectada(s)</label>
+                <input
+                  type="text"
+                  className="w-full border rounded-md p-2"
+                  value={partDescription}
+                  onChange={(e) => setPartDescription(e.target.value)}
+                  placeholder="Describe la(s) pieza(s) afectada(s)"
+                  disabled={savingFault}
+                />
+              </div>
+
+              <div className="mt-4">
+                <label className="block font-semibold mb-2">Descripción de la avería</label>
+                <textarea
+                  rows={4}
+                  className="w-full border rounded-md p-2 resize-none"
+                  value={faultDescription}
+                  onChange={(e) => setFaultDescription(e.target.value)}
+                  placeholder="Describe la avería o fallo..."
+                  disabled={savingFault}
+                />
+              </div>
+            </>
+          )}
 
           <DialogFooter className="mt-6 flex justify-end gap-2">
             <Button
