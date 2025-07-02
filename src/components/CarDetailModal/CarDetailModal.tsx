@@ -181,7 +181,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={handleAddFault}>
-                    Añadir avería
+                    Reportar avería
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={handleDelete}
@@ -230,7 +230,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
       <Dialog open={openAddFaultModal} onOpenChange={setOpenAddFaultModal}>
         <DialogContent className="w-[80vw] h-[80vh] max-w-4xl overflow-y-auto rounded-2xl p-6">
           <DialogHeader>
-            <DialogTitle>Añadir avería para {vehicle.brand} {vehicle.model}</DialogTitle>
+            <DialogTitle>Reportar avería para {vehicle.brand} {vehicle.model}</DialogTitle>
           </DialogHeader>
 
           <div className="mt-6 space-y-4">
