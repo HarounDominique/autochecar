@@ -96,14 +96,6 @@ export default function Sidebar() {
               Garaje
             </Link>
 
-            <Link
-              href="/dashboard/profile"
-              className={`block px-3 py-2 rounded-md hover:bg-gray-100 ${
-                pathname === "/dashboard/profile" ? "bg-gray-100 font-semibold" : ""
-              }`}
-            >
-              Perfil
-            </Link>
           </>
         )}
 

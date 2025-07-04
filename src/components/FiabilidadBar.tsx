@@ -2,30 +2,26 @@ import { Progress } from "@/components/ui/progress";
 
 export const FiabilidadBar = ({
                                 value,
-                                evaluado,
                               }: {
   value: number;
-  evaluado: boolean;
 }) => {
+  const getColor = () => {
+    if (value >= 95) return "bg-[#83bf4f]";        // verde premium
+    if (value >= 90) return "bg-green-500";        // verde fuerte
+    if (value >= 85) return "bg-lime-400";         // verde lima
+    if (value >= 75) return "bg-yellow-300";       // amarillo
+    if (value >= 65) return "bg-amber-400";        // ámbar
+    if (value >= 50) return "bg-orange-400";       // naranja
+    return "bg-red-500";                           // rojo
+  };
+
   return (
     <div className="space-y-1">
-      <p className="text-sm font-medium">
-        {evaluado ? `Fiabilidad: ${value.toFixed(0)}%` : "Sin datos suficientes"}
-      </p>
+      <p className="text-sm font-medium">Fiabilidad: {value.toFixed(0)}%</p>
       <Progress
-        value={evaluado ? value : 0}
-        className={evaluado ? "" : "bg-gray-200"}
-        indicatorClassName={
-          evaluado
-            ? value >= 100
-              ? "bg-[#83bf4f]"
-              : value >= 80
-                ? "bg-green-500"
-                : value >= 50
-                  ? "bg-yellow-500"
-                  : "bg-red-500"
-            : "bg-gray-300"
-        }
+        value={value}
+        className="bg-gray-200"
+        indicatorClassName={getColor()}
       />
     </div>
   );
