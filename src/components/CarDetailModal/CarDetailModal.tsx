@@ -18,6 +18,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreVertical } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { FaultsPieChart } from "@/components/FaultsPieChart";
 
 interface CarDetailModalProps {
   vehicle: Vehicle;
@@ -25,6 +28,12 @@ interface CarDetailModalProps {
   onClose: () => void;
   onDelete?: (deletedId: string) => void;
 }
+
+const COLORS = [
+  "#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1",
+  "#d0ed57", "#a4de6c", "#d0ed57", "#ffc0cb", "#ffb6b9",
+  "#c6c6c6", "#b19cd9", "#ffcccb", "#add8e6", "#90ee90"
+];
 
 export const CarDetailModal: React.FC<CarDetailModalProps> = ({
                                                                 vehicle,
@@ -40,15 +49,46 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [partDescription, setPartDescription] = useState("");
   const [faultDescription, setFaultDescription] = useState("");
-
+  const [faultsByCategory, setFaultsByCategory] = useState<any[]>([]);
+  const [faultsList, setFaultsList] = useState<any[]>([]);
 
   const supabase = createClient();
 
   useEffect(() => {
+    if (open) {
+      fetchFaults();
+    }
     if (openAddFaultModal && knowsOrigin === true) {
       fetchCategories();
     }
-  }, [openAddFaultModal, knowsOrigin]);
+  }, [open, openAddFaultModal, knowsOrigin]);
+
+  const fetchFaults = async () => {
+    const { data: grouped, error: groupedError } = await supabase
+      .from("fault_reports")
+      .select("category_id, fault_categories(name)")
+      .eq("vehicle_id", vehicle.id)
+      .eq("verified", true);
+
+    if (!groupedError && grouped) {
+      const counts: Record<string, number> = {};
+      grouped.forEach((r) => {
+        const cat = r.fault_categories?.name || "Desconocido";
+        counts[cat] = (counts[cat] || 0) + 1;
+      });
+      const chartData = Object.entries(counts).map(([name, value]) => ({ name, value }));
+      setFaultsByCategory(chartData);
+    }
+
+    const { data: faults, error: listError } = await supabase
+      .from("fault_reports")
+      .select("created_at, fault_description, part_description, fault_categories(name)")
+      .eq("vehicle_id", vehicle.id)
+      .eq("verified", true)
+      .order("created_at", { ascending: false });
+
+    if (!listError && faults) setFaultsList(faults);
+  };
 
   const fetchCategories = async () => {
     const { data, error } = await supabase.from("fault_categories").select("id, name");
@@ -65,9 +105,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
 
     try {
       const { error } = await supabase.from("vehicles").delete().eq("id", vehicle.id);
-
       if (error) {
-        console.error("Error al eliminar vehículo:", error.message);
         alert("Hubo un error al eliminar el vehículo.");
       } else {
         alert("Vehículo eliminado correctamente.");
@@ -75,49 +113,38 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
         onDelete?.(vehicle.id);
       }
     } catch (err) {
-      console.error("Error inesperado:", err);
       alert("Ha ocurrido un error inesperado.");
     } finally {
       setDeleting(false);
     }
   };
 
-  const handleAddFault = () => {
-    setOpenAddFaultModal(true);
-  };
+  const handleAddFault = () => setOpenAddFaultModal(true);
 
   const handleSaveFault = async () => {
-    if (knowsOrigin === null) {
-      alert("Por favor, indica si conoces el origen de la avería.");
+    if (knowsOrigin === null || faultDescription.trim() === "") {
+      alert("Completa los campos requeridos.");
       return;
     }
 
-    if (knowsOrigin === true && !selectedCategoryId) {
-      alert("Por favor, selecciona una categoría de avería.");
-      return;
-    }
-
-    if (faultDescription.trim() === "") {
-      alert("Por favor, describe la avería.");
+    if (knowsOrigin && !selectedCategoryId) {
+      alert("Selecciona una categoría de avería.");
       return;
     }
 
     setSavingFault(true);
-
     try {
-      // Obtener usuario actual
       const {
         data: { user },
         error: userError,
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        alert("No se pudo identificar el usuario. Por favor, inicia sesión.");
+        alert("Inicia sesión para continuar.");
         setSavingFault(false);
         return;
       }
 
-      // Crear snapshot del vehículo
       const vehicleSnapshot = {
         brand: vehicle.brand,
         model: vehicle.model,
@@ -140,21 +167,17 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
         created_at: new Date().toISOString(),
       });
 
-      if (error) {
-        console.error("Error al guardar avería:", error.message);
-        alert("Error al guardar la avería.");
-      } else {
-        alert("Avería guardada correctamente.");
-        // Reset form
+      if (!error) {
+        alert("Avería reportada con éxito.");
         setOpenAddFaultModal(false);
         setKnowsOrigin(null);
         setSelectedCategoryId(null);
         setPartDescription("");
         setFaultDescription("");
+        fetchFaults();
       }
-    } catch (err) {
-      console.error("Error inesperado:", err);
-      alert("Error inesperado al guardar la avería.");
+    } catch {
+      alert("Error al guardar la avería.");
     } finally {
       setSavingFault(false);
     }
@@ -162,7 +185,6 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
 
   return (
     <>
-      {/* Modal principal */}
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent className="w-[80vw] h-[80vh] max-w-4xl overflow-y-auto rounded-2xl p-6">
           <DialogHeader>
@@ -170,23 +192,13 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
               Detalles del vehículo
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    disabled={deleting}
-                    className="ml-4"
-                  >
+                  <Button variant="ghost" size="icon" disabled={deleting} className="ml-4">
                     <MoreVertical className="w-6 h-6" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleAddFault}>
-                    Reportar avería
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={handleDelete}
-                    className="text-red-600 hover:bg-red-50"
-                  >
+                  <DropdownMenuItem onClick={handleAddFault}>Reportar avería</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleDelete} className="text-red-600 hover:bg-red-50">
                     Eliminar vehículo
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -194,39 +206,67 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
             </DialogTitle>
           </DialogHeader>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 text-sm text-gray-800">
-            <div>
-              <strong>Tipo:</strong> {vehicle.type === "car" ? "Coche" : "Moto"}
-            </div>
-            <div>
-              <strong>Marca:</strong> {vehicle.brand}
-            </div>
-            <div>
-              <strong>Modelo:</strong> {vehicle.model}
-            </div>
-            <div>
-              <strong>Año:</strong> {vehicle.year}
-            </div>
-            <div>
-              <strong>Cilindrada:</strong> {vehicle.displacement} cc
-            </div>
-            <div>
-              <strong>Potencia:</strong> {vehicle.power} CV
-            </div>
-            <div>
-              <strong>Combustible:</strong> {vehicle.fuel}
-            </div>
-            <div>
-              <strong>Transmisión:</strong> {vehicle.transmission}
-            </div>
-            <div>
-              <strong>Fecha de alta:</strong> {new Date(vehicle.created_at).toLocaleDateString()}
-            </div>
-          </div>
+          <Tabs defaultValue="info" className="mt-6">
+            <TabsList className="mb-4">
+              <TabsTrigger value="info">Ficha técnica</TabsTrigger>
+              <TabsTrigger value="faults">Averías verificadas</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="info">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-800">
+                <div><strong>Tipo:</strong> {vehicle.type === "car" ? "Coche" : "Moto"}</div>
+                <div><strong>Marca:</strong> {vehicle.brand}</div>
+                <div><strong>Modelo:</strong> {vehicle.model}</div>
+                <div><strong>Año:</strong> {vehicle.year}</div>
+                <div><strong>Cilindrada:</strong> {vehicle.displacement} cc</div>
+                <div><strong>Potencia:</strong> {vehicle.power} CV</div>
+                <div><strong>Combustible:</strong> {vehicle.fuel}</div>
+                <div><strong>Transmisión:</strong> {vehicle.transmission}</div>
+                <div><strong>Fecha de alta:</strong> {new Date(vehicle.created_at).toLocaleDateString()}</div>
+              </div>
+
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-4">Distribución de averías por sistema</h3>
+                <FaultsPieChart vehicleId={vehicle.id} />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="faults">
+              {faultsByCategory.length === 0 ? (
+                <p>No hay averías verificadas.</p>
+              ) : (
+                <>
+                  <h3 className="font-semibold mb-2">Distribución por categoría</h3>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie data={faultsByCategory} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                        {faultsByCategory.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+
+                  <h3 className="font-semibold mt-6 mb-2">Listado de averías verificadas</h3>
+                  <ul className="space-y-2 text-sm">
+                    {faultsList.map((f, idx) => (
+                      <li key={idx} className="border p-3 rounded-md bg-gray-50">
+                        <div><strong>Sistema:</strong> {f.fault_categories?.name || "Desconocido"}</div>
+                        <div><strong>Pieza:</strong> {f.part_description || "N/D"}</div>
+                        <div><strong>Descripción:</strong> {f.fault_description}</div>
+                        <div><strong>Fecha:</strong> {new Date(f.created_at).toLocaleDateString()}</div>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
 
-      {/* Modal para añadir avería */}
       <Dialog open={openAddFaultModal} onOpenChange={setOpenAddFaultModal}>
         <DialogContent className="w-[80vw] h-[80vh] max-w-4xl overflow-y-auto rounded-2xl p-6">
           <DialogHeader>
@@ -250,54 +290,44 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
                 >
                   <option value="">Selecciona una categoría</option>
                   {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
               </div>
             )}
+
+            {knowsOrigin !== null && (
+              <>
+                <div className="mt-4">
+                  <label className="block font-semibold mb-2">Descripción de la pieza(s) afectada(s)</label>
+                  <input
+                    type="text"
+                    className="w-full border rounded-md p-2"
+                    value={partDescription}
+                    onChange={(e) => setPartDescription(e.target.value)}
+                    placeholder="Describe la(s) pieza(s) afectada(s)"
+                    disabled={savingFault}
+                  />
+                </div>
+
+                <div className="mt-4">
+                  <label className="block font-semibold mb-2">Descripción de la avería</label>
+                  <textarea
+                    rows={4}
+                    className="w-full border rounded-md p-2 resize-none"
+                    value={faultDescription}
+                    onChange={(e) => setFaultDescription(e.target.value)}
+                    placeholder="Describe la avería o fallo..."
+                    disabled={savingFault}
+                  />
+                </div>
+              </>
+            )}
           </div>
 
-          {knowsOrigin !== null && (
-            <>
-              <div className="mt-4">
-                <label className="block font-semibold mb-2">Descripción de la pieza(s) afectada(s)</label>
-                <input
-                  type="text"
-                  className="w-full border rounded-md p-2"
-                  value={partDescription}
-                  onChange={(e) => setPartDescription(e.target.value)}
-                  placeholder="Describe la(s) pieza(s) afectada(s)"
-                  disabled={savingFault}
-                />
-              </div>
-
-              <div className="mt-4">
-                <label className="block font-semibold mb-2">Descripción de la avería</label>
-                <textarea
-                  rows={4}
-                  className="w-full border rounded-md p-2 resize-none"
-                  value={faultDescription}
-                  onChange={(e) => setFaultDescription(e.target.value)}
-                  placeholder="Describe la avería o fallo..."
-                  disabled={savingFault}
-                />
-              </div>
-            </>
-          )}
-
           <DialogFooter className="mt-6 flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setOpenAddFaultModal(false)}
-              disabled={savingFault}
-            >
-              Cancelar
-            </Button>
-            <Button onClick={handleSaveFault} disabled={savingFault || knowsOrigin !== true}>
-              {savingFault ? "Guardando..." : "Guardar"}
-            </Button>
+            <Button variant="outline" onClick={() => setOpenAddFaultModal(false)} disabled={savingFault}>Cancelar</Button>
+            <Button onClick={handleSaveFault} disabled={savingFault || knowsOrigin !== true}>{savingFault ? "Guardando..." : "Guardar"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
