@@ -74,7 +74,7 @@ export default function Sidebar() {
       <h1 className="text-xl font-bold mb-6 text-center">autochecar</h1>
 
       <nav className="space-y-2 mb-6">
-        
+
         <Link
           href="/dashboard/reliability"
           className={`block px-3 py-2 rounded-md hover:bg-gray-100 ${
