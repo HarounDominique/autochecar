@@ -187,32 +187,47 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
     <>
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent className="w-[95vw] h-[95vh] max-w-none max-h-none overflow-y-auto rounded-xl p-6">
-          <DialogHeader>
-            <DialogTitle className="flex justify-between items-center text-2xl">
-              Detalles del vehículo
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" disabled={deleting} className="ml-4">
-                    <MoreVertical className="w-6 h-6" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleAddFault}>Reportar avería</DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleDelete} className="text-red-600 hover:bg-red-50">
-                    Eliminar vehículo
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </DialogTitle>
-          </DialogHeader>
+          <Tabs defaultValue="info" className="w-full">
+            <DialogHeader className="mb-4">
+              <div className="flex justify-between items-center">
+                <DialogTitle className="text-2xl font-semibold">
+                  Detalles del vehículo
+                </DialogTitle>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" disabled={deleting} className="ml-4">
+                      <MoreVertical className="w-6 h-6" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleAddFault}>Reportar avería</DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDelete} className="text-red-600 hover:bg-red-50">
+                      Eliminar vehículo
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
 
-          <Tabs defaultValue="info" className="mt-6">
-            <TabsList className="mb-4">
-              <TabsTrigger value="info">Ficha técnica</TabsTrigger>
-              <TabsTrigger value="faults">Averías verificadas</TabsTrigger>
-            </TabsList>
+              <TabsList className="mt-4 flex border-b border-gray-200">
+                <TabsTrigger
+                  value="info"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 border border-b-transparent rounded-t-md bg-white data-[state=active]:border-b-white data-[state=active]:bg-gray-100"
+                >
+                  Ficha técnica
+                </TabsTrigger>
+                <TabsTrigger
+                  value="faults"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 border border-b-transparent rounded-t-md bg-white data-[state=active]:border-b-white data-[state=active]:bg-gray-100"
+                >
+                  Averías verificadas
+                </TabsTrigger>
+              </TabsList>
+            </DialogHeader>
 
-            <TabsContent value="info">
+            <TabsContent
+              value="info"
+              className="border border-t-0 rounded-b-md p-4 bg-white shadow-sm"
+            >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-800">
                 <div><strong>Tipo:</strong> {vehicle.type === "car" ? "Coche" : "Moto"}</div>
                 <div><strong>Marca:</strong> {vehicle.brand}</div>
