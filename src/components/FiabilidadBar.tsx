@@ -6,7 +6,7 @@ export const FiabilidadBar = ({
   value: number;
 }) => {
   const getColor = () => {
-    if (value >= 90) return "bg-[#83bf4f]";        
+    if (value >= 90) return "bg-[#83bf4f]";
     if (value >= 80) return "bg-green-500";
     if (value >= 70) return "bg-[#e6e94a]";
     if (value >= 60) return "bg-amber-400";

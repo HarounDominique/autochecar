@@ -186,7 +186,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="w-[80vw] h-[80vh] max-w-4xl overflow-y-auto rounded-2xl p-6">
+        <DialogContent className="w-[95vw] h-[95vh] max-w-none max-h-none overflow-y-auto rounded-xl p-6">
           <DialogHeader>
             <DialogTitle className="flex justify-between items-center text-2xl">
               Detalles del vehículo
