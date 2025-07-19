@@ -20,6 +20,7 @@ import { MoreVertical } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { FaultsPieChart } from "@/components/FaultsPieChart";
+import { categoryIconMap } from "@/components/CATEGORY_ICONS";
 
 interface CarDetailModalProps {
   vehicle: Vehicle;
@@ -190,6 +191,19 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
 
             <TabsContent value="fiabilidad" className="p-4 bg-white border rounded-b-md">
               <FaultsPieChart vehicleId={vehicle.id} showOnlyChart />
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+                {Object.entries(categoryIconMap).map(([name, Icon]) => (
+                  <div
+                    key={name}
+                    className="flex flex-col items-center justify-center p-3 border rounded-xl shadow-sm bg-white hover:bg-gray-50 transition"
+                  >
+                    {Icon}
+                    <span className="mt-2 text-sm text-center">{name}</span>
+                  </div>
+                ))}
+              </div>
+
             </TabsContent>
           </Tabs>
         </DialogContent>
