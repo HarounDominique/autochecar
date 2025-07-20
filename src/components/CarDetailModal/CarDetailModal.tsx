@@ -296,7 +296,7 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
                         className="w-full max-w-[110px] h-[100px] flex flex-col items-center justify-center p-2 border rounded-lg shadow-sm bg-white hover:bg-gray-50 transition"
                       >
                         <div className="w-6 h-6">
-                          {IconFn(iconColor)} {/* <-- Aquí se pasa la clase como argumento */}
+                          {IconFn(iconColor)}
                         </div>
                         <span className="mt-2 text-[11px] text-center leading-tight">{name}</span>
                       </div>
