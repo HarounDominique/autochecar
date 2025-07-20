@@ -47,10 +47,51 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
   const supabase = createClient();
 
   useEffect(() => {
-    if (open) {
-      fetchFaultReliability();
-    }
-  }, [open]);
+    if (!vehicle) return;
+
+    const fetchData = async () => {
+      // 1. Cargar categorías
+      const { data: categoryData, error: categoryError } = await supabase
+        .from("fault_categories")
+        .select("id, name");
+
+      if (categoryError || !categoryData) return;
+
+      setCategories(categoryData);
+
+      // 2. Cargar fallas del vehículo actual
+      const { data: faultsData, error: faultsError } = await supabase
+        .from("fault_reports")
+        .select("category_id")
+        .eq("vehicle_id", vehicle.id)
+        .eq("is_verified", true);
+
+      if (faultsError || !faultsData) return;
+
+      // 3. Contar por categoría
+      const counts: Record<number, number> = {};
+      for (const row of faultsData) {
+        if (row.category_id) {
+          counts[row.category_id] = (counts[row.category_id] || 0) + 1;
+        }
+      }
+
+      // 4. Calcular fiabilidad bayesiana
+      const PRIOR_SCORE = 0.95;
+      const PRIOR_COUNT = 5;
+
+      const result: Record<number, number> = {};
+      for (const cat of categoryData) {
+        const n = counts[cat.id] || 0;
+        const score = (PRIOR_SCORE * PRIOR_COUNT + 0 * n) / (PRIOR_COUNT + n);
+        result[cat.id] = parseFloat(score.toFixed(3));
+      }
+
+      setCategoryReliability(result);
+    };
+
+    fetchData();
+  }, [vehicle]);
 
   const fetchFaultReliability = async () => {
     const { data, error } = await supabase
