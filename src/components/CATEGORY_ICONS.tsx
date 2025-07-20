@@ -1,22 +1,9 @@
-import {
-  WavesIcon,
-  CircleGaugeIcon,
-  GanttChartIcon,
-  ZapIcon,
-  RadarIcon,
-  ThermometerIcon,
-  FanIcon,
-  PanelTopIcon,
-  LandmarkIcon,
-  CarIcon,
-  PlugIcon,
-} from "lucide-react";
 
-export const categoryIconMap: Record<string, JSX.Element> = {
-  "Motor": (
+export const categoryIconMap: Record<string, (colorClass: string) => JSX.Element> = {
+  "Motor": (className: string) => (
     <svg
-      className="w-6 h-6"
-      fill="#000000"
+      className={`w-6 h-6 ${className}`}
+      fill="currentColor"
       viewBox="0 -14.14 122.88 122.88"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -36,9 +23,9 @@ export const categoryIconMap: Record<string, JSX.Element> = {
     </svg>
   ),
 
-  "Transmisión / Cambio": (
+  "Transmisión / Cambio": (colorClass) => (
     <svg
-      className="w-6 h-6"
+      className={`w-6 h-6 ${colorClass}`}
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -60,23 +47,23 @@ export const categoryIconMap: Record<string, JSX.Element> = {
     </svg>
   ),
 
-  "Embrague": (
+  "Embrague": (colorClass) => (
     <svg
       viewBox="0 0 512 512"
       fill="#000000"
       xmlns="http://www.w3.org/2000/svg"
-      className="w-6 h-6"
+      className={`w-6 h-6 ${colorClass}`}
     >
       <path d="M256,151.972c-56.436,0-102.35,45.913-102.35,102.349s45.915,102.35,102.35,102.35s102.35-45.915,102.35-102.35 C358.35,197.886,312.436,151.972,256,151.972z"/>
       <path d="M488.727,192.188h-15.099c-4.881-16.342-11.414-32.361-19.025-46.584l11.205-11.371c8.707-8.802,8.677-23.069-0.069-31.834 l-57.599-57.901c-4.225-4.236-9.962-6.961-15.943-6.961c-0.044,0-0.089,0-0.132,0c-6.028,0-11.79,2.833-15.997,7.15l-10.359,10.976 c-14.097-7.654-29.457-14.06-45.149-18.824V22.522C320.561,10.084,310.478,0,298.039,0h-84.082c-12.438,0-22.522,10.084-22.522,22.522v14.309 c-15.755,4.772-31.145,11.036-45.236,18.681L135.51,44.529c-4.216-4.276-9.967-6.992-15.973-6.992c-0.021,0-0.042,0-0.065,0 c-5.983,0-11.722,2.665-15.949,6.904l-57.436,57.883c-8.719,8.743-8.772,22.876-0.12,31.685l11.383,11.588 c-7.585,14.201-14.108,30.195-18.989,46.591h-15.09c-12.438,0-22.522,10.084-22.522,22.522v82.581c0,12.438,10.084,22.522,22.522,22.522h15.156 c4.736,15.51,11.114,30.738,18.749,44.765L46.46,375.05c-4.311,4.213-6.754,9.977-6.781,16.004s2.362,11.814,6.633,16.066l57.599,57.333 c4.275,4.254,10.094,6.647,16.106,6.558c6.031-0.059,11.786-2.533,15.977-6.869l10.38-10.739c13.985,7.543,29.313,13.883,45.062,18.63 v17.444c0,12.438,10.084,22.522,22.522,22.522h84.082c12.438,0,22.522-10.084,22.522-22.522v-17.459 c15.753-4.772,31.145-11,45.236-18.645l10.689,11.021c4.218,4.276,9.968,7.066,15.974,7.066c0.021,0,0.042,0,0.065,0 c5.983,0,11.722-2.739,15.949-6.977l57.436-57.958c4.284-4.294,6.653-10.135,6.572-16.201c-0.08-6.064-2.604-11.841-6.998-16.021 l-10.467-9.955c7.542-13.929,13.857-29.076,18.564-44.536h15.145c12.438,0,22.522-10.084,22.522-22.522V214.71 C511.249,202.272,501.165,192.188,488.727,192.188z M256,394.208c-77.135,0-139.887-62.752-139.887-139.887 c0-77.133,62.752-139.886,139.887-139.886s139.887,62.754,139.887,139.886C395.887,331.456,333.135,394.208,256,394.208z"/>
     </svg>
   ),
 
-  "Escape": (
+  "Escape": (colorClass) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 512 512"
-      className="w-9 h-9"
+      className={`w-9 h-9 ${colorClass}`}
       fill="currentColor"
     >
       <path d="M435.099,300.021c-4.379,15.525-12.066,24.847-17.781,24.847c-8.447,0-21.217-20.354-21.217-51.033
@@ -92,11 +79,11 @@ export const categoryIconMap: Record<string, JSX.Element> = {
     </svg>
   ),
 
-  "Frenos": (
+  "Frenos": (colorClass) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 512 512"
-      className="w-6 h-6"
+      className={`w-6 h-6 ${colorClass}`}
       fill="currentColor"
     >
       <path d="M307.072,44.433V33.659c0-9.152-3.797-18.005-10.432-24.32c-6.677-6.357-15.829-9.557-25.088-9.323
@@ -116,11 +103,11 @@ export const categoryIconMap: Record<string, JSX.Element> = {
     </svg>
   ),
 
-  "Suspensión": (
+  "Suspensión": (colorClass) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="-6.79 0 20 20"
-      className="w-9 h-9"
+      className={`w-9 h-9 ${colorClass}`}
       fill="currentColor"
     >
       <g id="suspension" transform="translate(-8.787 -2)">
@@ -137,11 +124,11 @@ export const categoryIconMap: Record<string, JSX.Element> = {
     </svg>
   ),
 
-  "Dirección": (
+  "Dirección": (colorClass) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 512 512"
-      className="w-6 h-6"
+      className={`w-6 h-6 ${colorClass}`}
       fill="currentColor"
     >
       <path d="M437.02,74.981C388.668,26.628,324.38,0,256,0S123.333,26.628,74.98,74.981C26.628,123.333,0,187.62,0,256
@@ -155,11 +142,11 @@ export const categoryIconMap: Record<string, JSX.Element> = {
     </svg>
   ),
 
-  "Sistema Eléctrico": (
+  "Sistema Eléctrico": (colorClass) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 512 512"
-      className="w-6 h-6"
+      className={`w-6 h-6 ${colorClass}`}
       fill="currentColor"
     >
       <path d="M494.643,169.478c9.586,0,17.357-7.771,17.357-17.357v-50.324c0-9.586-7.771-17.357-17.357-17.357h-28.056V42.274
@@ -175,11 +162,11 @@ export const categoryIconMap: Record<string, JSX.Element> = {
     </svg>
   ),
 
-  "Electrónica / ECU": (
+  "Electrónica / ECU": (colorClass) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 512 512"
-      className="w-6 h-6"
+      className={`w-6 h-6 ${colorClass}`}
       fill="currentColor"
     >
       <path d="
@@ -204,22 +191,22 @@ export const categoryIconMap: Record<string, JSX.Element> = {
     </svg>
   ),
 
-  "Refrigeración": (
+  "Refrigeración": (colorClass) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 20 20"
-      className="w-6 h-6"
+      className={`w-6 h-6 ${colorClass}`}
       fill="currentColor"
     >
       <path d="M9 11.17V7h2v4.17a3 3 0 1 1-2 0zm-1-.63a4 4 0 1 0 4 0V4a2 2 0 1 0-4 0v6.53zM6 9.53V4a4 4 0 0 1 8 0v5.53A5.99 5.99 0 0 1 10 20 6 6 0 0 1 6 9.53z" />
     </svg>
   ),
 
-  "Alimentación / Combustible": (
+  "Alimentación / Combustible": (colorClass) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 512 512"
-      className="w-6 h-6"
+      className={`w-6 h-6 ${colorClass}`}
       fill="currentColor"
     >
       <path d="M485.395,158.609c-7.296-8.514-12.122-13.426-20.826-22.348c-27.93-28.573-53.191-53.843-53.218-53.869
@@ -239,11 +226,11 @@ export const categoryIconMap: Record<string, JSX.Element> = {
     </svg>
   ),
 
-  "Admisión / Aire": (
+  "Admisión / Aire": (colorClass) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 490.6 490.6"
-      className="w-6 h-6"
+      className={`w-6 h-6 ${colorClass}`}
       fill="currentColor"
     >
       <path d="M469.3,234.65H384c0-11.8-9.5-21.3-21.3-21.3h-64c-11.8,0-21.3,9.5-21.3,21.3h-12.5c-4.8,0-8.8-3.9-8.8-8.8v-12.5
@@ -254,11 +241,11 @@ export const categoryIconMap: Record<string, JSX.Element> = {
     </svg>
   ),
 
-  "Interior": (
+  "Interior": (colorClass) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 1920 1920"
-      className="w-6 h-6"
+      className={`w-6 h-6 ${colorClass}`}
       fill="currentColor"
     >
       <path d="M960 282c529.355 0 960 430.758 960 960 0 77.139-8.922 153.148-26.541 225.882l-10.504 43.144h-560.188c-27.106 74.88-79.85 140.838-155.52 181.045-47.887 25.185-101.647 38.625-155.633 38.625-123.445 0-236.047-67.651-293.76-176.64-5.873-11.18-11.859-25.75-17.845-43.03H37.045l-10.504-43.144C8.922 1395.148 0 1319.14 0 1242c0-529.242 430.645-960 960-960Zm168.17 1229.026c47.66-49.355 61.214-125.139 27.331-189.064-42.24-79.51-403.765-413.59-403.765-413.59s73.638 486.776 115.765 566.287c7.341 13.892 16.941 25.525 27.219 36.367h-.904c2.033 2.146 4.518 3.614 6.551 5.534 4.63 4.405 9.374 8.47 14.344 12.198 3.727 2.823 7.68 5.308 11.52 7.68 5.195 3.162 10.39 6.098 15.924 8.81 4.292 1.92 8.584 3.726 13.101 5.42 5.422 1.92 10.956 3.727 16.716 5.083a159.91 159.91 0 0 0 14.23 3.049c5.76.904 11.407 1.468 17.167 1.694 2.824.113 5.535.79 8.245.79 1.92 0 3.84-.677 5.76-.677 8.245-.226 16.377-1.355 24.508-2.936 3.727-.791 7.567-1.13 11.294-2.146 11.746-3.163 23.266-7.229 34.335-13.214h.338v-.113c15.7-8.245 28.687-19.2 40.32-31.172Zm361.524-625.807 112.715-112.715-119.717-119.831-112.828 112.715 119.83 119.83Zm-614.4-254.457h169.412V471.29H875.294v159.473ZM430.306 885.22l119.83-119.83-112.715-112.716-119.83 119.83L430.306 885.22Z" />
@@ -266,14 +253,14 @@ export const categoryIconMap: Record<string, JSX.Element> = {
   ),
 
 
-  "Exterior / Carrocería": (
+  "Exterior / Carrocería": (colorClass) => (
     <svg
       viewBox="0 0 24.00 24.00"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       stroke="#000000"
       strokeWidth="1.2"
-      className="w-6 h-6"
+      className={`w-6 h-6 ${colorClass}`}
     >
       <path
         fillRule="evenodd"
@@ -284,12 +271,12 @@ export const categoryIconMap: Record<string, JSX.Element> = {
     </svg>
   ),
 
-  "Neumáticos / Ruedas": (
+  "Neumáticos / Ruedas": (colorClass) => (
     <svg
       viewBox="0 0 512 512"
       fill="#000000"
       xmlns="http://www.w3.org/2000/svg"
-      className="w-6 h-6"
+      className={`w-6 h-6 ${colorClass}`}
     >
       <path d="M256.004,0C114.613,0,0.001,114.613,0.001,256.004C0.001,397.387,114.613,512,256.004,512
       c141.383,0,255.996-114.613,255.996-255.996C511.999,114.613,397.387,0,256.004,0z M256.004,419.18

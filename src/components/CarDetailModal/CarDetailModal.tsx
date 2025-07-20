@@ -47,10 +47,50 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
   const supabase = createClient();
 
   useEffect(() => {
-    if (openAddFaultModal && knowsOrigin === true) {
-      fetchCategories();
+    if (open) {
+      fetchFaultReliability();
     }
-  }, [openAddFaultModal, knowsOrigin]);
+  }, [open]);
+
+  const fetchFaultReliability = async () => {
+    const { data, error } = await supabase
+      .from("fault_reports")
+      .select("category_id")
+      .eq("vehicle_id", vehicle.id)
+      .eq("knows_origin", true)
+      .eq("is_verified", true);
+
+    if (error || !data) return;
+
+    // Contamos averías por categoría
+    const counts: Record<number, number> = {};
+    for (const fault of data) {
+      if (fault.category_id) {
+        counts[fault.category_id] = (counts[fault.category_id] || 0) + 1;
+      }
+    }
+
+    const PRIOR_SCORE = 0.95;
+    const PRIOR_COUNT = 5;
+
+    const result: Record<number, number> = {};
+    for (const [catIdStr, faultCount] of Object.entries(counts)) {
+      const catId = Number(catIdStr);
+      const total = faultCount + PRIOR_COUNT;
+      const score = (PRIOR_SCORE * PRIOR_COUNT) / total;
+      result[catId] = parseFloat(score.toFixed(3));
+    }
+
+    // Las categorías sin averías explícitas se consideran perfectas
+    for (const [name, Icon] of Object.entries(categoryIconMap)) {
+      const id = categories.find((c) => c.name === name)?.id;
+      if (id && !(id in result)) {
+        result[id] = 1.0;
+      }
+    }
+
+    setCategoryReliability(result);
+  };
 
   const fetchCategories = async () => {
     const { data, error } = await supabase.from("fault_categories").select("id, name");
@@ -144,6 +184,8 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
     }
   };
 
+  const [categoryReliability, setCategoryReliability] = useState<Record<number, number>>({});
+
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
@@ -193,16 +235,34 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
               {/* Columna iconos */}
               <div className="flex-1 max-h-[60vh] overflow-y-auto border-r border-gray-200 pr-4">
                 <div className="grid grid-cols-5 gap-4 mt-4">
-                  {Object.entries(categoryIconMap).map(([name, Icon]) => (
-                    <div
-                      key={name}
-                      className="w-full max-w-[110px] h-[100px] flex flex-col items-center justify-center p-2 border rounded-lg shadow-sm bg-white hover:bg-gray-50 transition"
-                    >
-                      <div className="w-6 h-6">{Icon}</div>
-                      <span className="mt-2 text-[11px] text-center leading-tight">{name}</span>
-                    </div>
-                  ))}
+                  {Object.entries(categoryIconMap).map(([name, IconFn]) => {
+                    // Encontramos la categoría por nombre
+                    const category = categories.find((c) => c.name === name);
+                    // Obtenemos la fiabilidad de esa categoría
+                    const reliability = category ? categoryReliability[category.id] : null;
+
+                    // Asignamos color según fiabilidad
+                    let iconColor = "text-gray-400";
+                    if (reliability !== undefined && reliability !== null) {
+                      if (reliability >= 0.95) iconColor = "text-green-500";
+                      else if (reliability >= 0.85) iconColor = "text-yellow-500";
+                      else iconColor = "text-red-500";
+                    }
+
+                    return (
+                      <div
+                        key={name}
+                        className="w-full max-w-[110px] h-[100px] flex flex-col items-center justify-center p-2 border rounded-lg shadow-sm bg-white hover:bg-gray-50 transition"
+                      >
+                        <div className="w-6 h-6">
+                          {IconFn(iconColor)} {/* <-- Aquí se pasa la clase como argumento */}
+                        </div>
+                        <span className="mt-2 text-[11px] text-center leading-tight">{name}</span>
+                      </div>
+                    );
+                  })}
                 </div>
+
               </div>
 
               {/* Columna piechart */}
