@@ -189,22 +189,28 @@ export const CarDetailModal: React.FC<CarDetailModalProps> = ({
               </div>
             </TabsContent>
 
-            <TabsContent value="fiabilidad" className="p-4 bg-white border rounded-b-md">
-              <FaultsPieChart vehicleId={vehicle.id} showOnlyChart />
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
-                {Object.entries(categoryIconMap).map(([name, Icon]) => (
-                  <div
-                    key={name}
-                    className="flex flex-col items-center justify-center p-3 border rounded-xl shadow-sm bg-white hover:bg-gray-50 transition"
-                  >
-                    {Icon}
-                    <span className="mt-2 text-sm text-center">{name}</span>
-                  </div>
-                ))}
+            <TabsContent value="fiabilidad" className="p-4 bg-white border rounded-b-md h-full flex flex-row gap-x-4">
+              {/* Columna iconos */}
+              <div className="flex-1 max-h-[60vh] overflow-y-auto border-r border-gray-200 pr-4">
+                <div className="grid grid-cols-5 gap-4 mt-4">
+                  {Object.entries(categoryIconMap).map(([name, Icon]) => (
+                    <div
+                      key={name}
+                      className="w-full max-w-[110px] h-[100px] flex flex-col items-center justify-center p-2 border rounded-lg shadow-sm bg-white hover:bg-gray-50 transition"
+                    >
+                      <div className="w-6 h-6">{Icon}</div>
+                      <span className="mt-2 text-[11px] text-center leading-tight">{name}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
+              {/* Columna piechart */}
+              <div className="flex-1 flex items-center justify-center max-h-[60vh]">
+                <FaultsPieChart vehicleId={vehicle.id} showOnlyChart />
+              </div>
             </TabsContent>
+
           </Tabs>
         </DialogContent>
       </Dialog>
